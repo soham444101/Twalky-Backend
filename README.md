@@ -71,7 +71,6 @@ npm run dev
 
 | Method   | Endpoint                   | Description                          |
 | -------- | -------------------------- | ------------------------------------ |
-| **GET**  | `/`                        | Health check (returns server status) |
 | **GET**  | `/create-session`          | Create a new meeting session         |
 | **GET**  | `/is-alive?sessionId=xxxx` | Check if a session exists            |
 
@@ -79,6 +78,8 @@ npm run dev
 
 | Event                | Direction                  | Description                             |
 | -------------------- | -------------------------- | --------------------------------------- |
+| `prepare-session`    | Client → Server            | User is in Prepareing meet              |
+| `session-info`       | Server → All               | Infromation about participant in room   |
 | `join-session`       | Client → Server            | Join an existing session                |
 | `send-offer`         | Client → Server → Receiver | Send WebRTC offer                       |
 | `send-answer`        | Client → Server → Receiver | Send WebRTC answer                      |
@@ -86,6 +87,7 @@ npm run dev
 | `new-participant`    | Server → All               | Notify participants of a new user       |
 | `participant-left`   | Server → All               | Notify participants when someone leaves |
 | `hang-up`            | Client → Server            | Leave call gracefully                   |
+| `disconnect`         | Client → Server            | Leave call gracefully                   |
 
 ---
 
@@ -117,7 +119,7 @@ twalky-meet-backend/
 3. A creates offer → sends via `send-offer`
 4. B receives offer → creates answer → sends `send-answer`
 5. Both exchange ICE candidates via `send-ice-candidate`
-6. Connection established 🎥
+6. Connection established 
 
 ---
 
@@ -146,3 +148,4 @@ twalky-meet-backend/
 
 
 ⭐ **If you found this project useful, give it a star on GitHub!**
+

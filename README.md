@@ -35,7 +35,13 @@ Graceful shutdown handling
 ## ⚙️ Installation
 
 1. Clone this repository
-   ```bash
    git clone https://github.com/your-username/twalky-meet-backend.git
    cd twalky-meet-backend
+2. Create a .env file with follow variables
+ MOOGO_URL="Your_Db_Link"
+PORT=5000
+3. Install npm and run
+npm install
+npm run dev
+
 

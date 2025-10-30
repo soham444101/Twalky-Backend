@@ -4,8 +4,15 @@ const webRTCSSignalingSocket = (io) => {
   io.on("connection", async (socket) => {
     console.log("User Connected", socket.id);
 
+    // Track session and user for this socket
+    let currentSessionId = null;
+    let currentUserId = null;
+
     socket.on("prepare-session", async ({ sessionId, userId }) => {
       console.log(`User ${userId} is preparing to join session ${sessionId}`);
+
+      currentSessionId = sessionId;
+      currentUserId = userId;
 
       const session = await Session.findOne({ sessionId });
 
@@ -14,19 +21,19 @@ const webRTCSSignalingSocket = (io) => {
 
         socket.emit("session-info", {
           participant: session?.participants,
-        });
-
-        socket.on("disconnect", () => {
-          console.log(`User ${userId} is disconnected`);
-        });
+        }); 
+        console.log("Participants present in the session", session);
       } else {
         console.log(`Session not found. ID: ${sessionId}`);
         socket.emit("error", { message: "Session is not found" });
       }
     });
 
-    socket.on("join-session", async ({ sessionId, userId, name, photo, micon, videon }) => {  
+    socket.on("join-session", async ({ sessionId, userId, name, photo, micOn, videoOn }) => {
       try {
+        currentSessionId = sessionId;
+        currentUserId = userId;
+
         const session = await Session.findOne({ sessionId });
 
         if (session) {
@@ -37,8 +44,8 @@ const webRTCSSignalingSocket = (io) => {
               ...session.participants[index],
               name: name || session.participants[index].name,
               photo: photo || session.participants[index].photo,
-              micon,
-              videon,
+              micOn,
+              videoOn,
               socketId: socket.id,
             };
           } else {
@@ -46,8 +53,8 @@ const webRTCSSignalingSocket = (io) => {
               userId,
               name,
               photo,
-              micon,
-              videon,
+              micOn,
+              videoOn,
               socketId: socket.id,
             });
           }
@@ -57,9 +64,16 @@ const webRTCSSignalingSocket = (io) => {
 
           console.log(`User ${userId} joined session ${sessionId}`);
 
-          io.to(sessionId).emit("new-participant",
-            session.participants.find(p => p.userId === userId)
-          );
+          io.to(sessionId).emit("new-participant", {
+            participant: {
+              userId: userId,
+              name: name,
+              photo: photo,
+              micOn: micOn,
+              videoOn: videoOn,
+            }
+          });
+          console.log("Participants present in the session", session);
 
           io.to(sessionId).emit("session-info", {
             participant: session.participants,
@@ -91,7 +105,7 @@ const webRTCSSignalingSocket = (io) => {
 
     socket.on("send-ice-candidate", async ({ sessionId, sender, receiver, candidate }) => {
       console.log(`User ${sender} is sending ICE candidate to ${receiver} in session ${sessionId}`);
-      io.to(sessionId).emit("receiving-ice-candidate", {
+      io.to(sessionId).emit("receive-ice-candidate", {
         sender,
         receiver,
         candidate,
@@ -105,10 +119,10 @@ const webRTCSSignalingSocket = (io) => {
 
       const participant = session.participants.find(p => p.userId === userId);
       if (participant) {
-        participant.micon = !participant.micon;
+        participant.micOn = !participant.micOn;
         await session.save();
 
-        console.log(`User ${userId} is now ${participant.micon ? "muted" : "unmuted"}`);
+        console.log(`User ${userId} is now ${participant.micOn ? "unmuted" : "muted"}`);
         io.to(sessionId).emit("participant-update", participant);
       }
     });
@@ -159,46 +173,63 @@ const webRTCSSignalingSocket = (io) => {
       }
     });
 
-    socket.on("hang-up", async () => {
-      console.log("User Hang Up:", socket.id);
-      const sessions = await Session.find();
+    // Helper function to handle cleanup (used by both hang-up and disconnect)
+    const cleanupParticipant = async () => {
+      if (!currentSessionId || !currentUserId) {
+        console.log("No session tracked for this socket, skipping cleanup");
+        return;
+      }
 
-      for (const session of sessions) {
-        const index = session.participants.findIndex(p => p.socketId === socket.id);
+      try {
+        const session = await Session.findOne({ sessionId: currentSessionId });
+        
+        if (!session) {
+          console.log(`Session ${currentSessionId} not found during cleanup`);
+          return;
+        }
+
+        // Find participant by socketId OR userId (for redundancy)
+        const index = session.participants.findIndex(
+          p => p.socketId === socket.id || p.userId === currentUserId
+        );
+
         if (index !== -1) {
           const participant = session.participants[index];
           session.participants.splice(index, 1);
           await session.save();
 
-          console.log(`User ${participant.name} (${participant.userId}) left session ${session.sessionId}`);
+          console.log(` User ${participant.name} (${participant.userId}) removed from session ${session.sessionId}`);
+          
+          // Notify all remaining participants
           io.to(session.sessionId).emit("session-info", {
-            participants: session.participants,
+            participant: session.participants,
           });
           io.to(session.sessionId).emit("participant-left", participant.userId);
-          break;
+        } else {
+          console.log(` Participant not found in session ${currentSessionId}`);
         }
+      } catch (error) {
+        console.error("Error during cleanup:", error);
       }
+    };
+
+    // HANG-UP EVENT
+    // Triggers when: User explicitly clicks "Leave" or "Hang Up" button
+    socket.on("hang-up", async () => {
+      console.log(" HANG-UP triggered by user:", socket.id);
+      await cleanupParticipant();
     });
 
+    // DISCONNECT EVENT
+    // Triggers when:
+    // 1. Browser/tab closes
+    // 2. Network connection lost
+    // 3. Page refresh
+    // 4. Navigation away from page
+    // 5. Socket.io connection timeout
     socket.on("disconnect", async () => {
-      console.log("User disconnected:", socket.id);
-      const sessions = await Session.find();
-
-      for (const session of sessions) {
-        const index = session.participants.findIndex(p => p.socketId === socket.id);
-        if (index !== -1) {
-          const participant = session.participants[index];
-          session.participants.splice(index, 1);
-          await session.save();
-
-          console.log(`User ${participant.name} (${participant.userId}) left session ${session.sessionId}`);
-          io.to(session.sessionId).emit("session-info", {
-            participants: session.participants,
-          });
-          io.to(session.sessionId).emit("participant-left", participant.userId);
-          break;
-        }
-      }
+      console.log(" DISCONNECT triggered:", socket.id);
+      await cleanupParticipant();
     });
   });
 };

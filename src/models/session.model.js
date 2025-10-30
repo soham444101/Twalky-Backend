@@ -1,29 +1,26 @@
 import mongoose from "mongoose";
 
 const sessionSchema = new mongoose.Schema({
-
     sessionId: {
         type: String,
-        require: true,
+        required: true, 
         unique: true
-    }
-    ,
+    },
     participants: [
         {
             userId: { type: String, default: "" },
-            socketId: { type: String, dafault: "" },
-            name: { type: String, dafault: "" },
+            socketId: { type: String, default: "" }, 
+            name: { type: String, default: "" }, 
             photo: { type: String, default: "" },
-            micon: { type: Boolean, default: false },
-            videon: { type: Boolean, default: false }
+            micOn: { type: Boolean, default: false },
+            videoOn: { type: Boolean, default: false }
         }
-    ]
-    ,
+    ],
     createdAt: {
         type: Date,
         default: Date.now,
-        expirs: "1d",
+        expires: "1d", 
     }
-})
+});
 
 export const Session = mongoose.model("Session", sessionSchema);

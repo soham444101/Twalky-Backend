@@ -1,29 +1,17 @@
-Absolutely 👍 — here’s a **complete and beautifully formatted `README.md`** for your **Twalky Meet Backend**, with copy-ready commands, `.env` setup, API list, and contact info — all in one single file.
-
-You can copy-paste this entire content directly into your `README.md`.
-
----
-
-````markdown
-# 🛰️ Twalky Meet (Backend)
+# 🛰️ Twalky : Meet App (Backend)
 
 This backend powers the **Twalky Meet** application — a real-time video meeting system built with **WebRTC** and **Socket.IO**.  
 It manages **session creation**, **user participation**, and **peer-to-peer signaling** between connected users.
 
----
-
 ## 🚀 Features
 
-- ⚡ Real-time WebSocket signaling using **Socket.IO**
-- 📞 Peer-to-peer WebRTC offer/answer handling
-- ❄️ ICE candidate forwarding between peers
-- 👥 Session creation, validation & participant management
-- 🗄️ MongoDB storage for sessions
-- 🛡️ Express with CORS & JSON middleware
-- 🧹 Graceful shutdown handling
-- 🧠 Scalable backend structure
-
----
+-  Real-time WebSocket signaling using **Socket.IO**
+-  Peer-to-peer WebRTC offer/answer handling
+-  ICE candidate forwarding between peers
+-  Session creation, validation & participant management
+-  MongoDB storage for sessions
+-  Express with CORS & JSON middleware
+-  Graceful shutdown handling
 
 ## 🧩 Tech Stack
 
@@ -74,10 +62,10 @@ npm install
 npm run dev
 ```
 
-> ✅ Server will run on `http://localhost:5000`
+> Server will run on `http://localhost:5000`
 > WebSocket will be active on the same URL.
 
----
+
 
 ## 🌐 API Endpoints
 
@@ -86,9 +74,6 @@ npm run dev
 | **GET**  | `/`                        | Health check (returns server status) |
 | **GET**  | `/create-session`          | Create a new meeting session         |
 | **GET**  | `/is-alive?sessionId=xxxx` | Check if a session exists            |
-| **POST** | `/auth/google`             | Mock Google auth endpoint            |
-
----
 
 ## 🔌 WebSocket Events
 
@@ -119,7 +104,7 @@ twalky-meet-backend/
 │   └── index.database.js      # Database connection logic
 │
 ├── .env                       # Environment variables
-├── server.js / index.js        # Main entry point
+├── app.js       # Main entry point
 └── package.json
 ```
 
@@ -143,7 +128,6 @@ twalky-meet-backend/
 | `npm install`  | Install all dependencies         |
 | `npm run dev`  | Start server in development mode |
 | `npm start`    | Start server in production mode  |
-| `npm run lint` | Run linter (if configured)       |
 
 ---
 
@@ -152,29 +136,13 @@ twalky-meet-backend/
 * Ensure **MongoDB** is running and accessible before starting the backend.
 * WebRTC communication requires the frontend to exchange SDP (offer/answer) correctly.
 * Keep the **Socket.IO version** consistent across frontend and backend.
-* Use `ngrok` or a similar tunneling service to test on physical devices.
-
 ---
 
 ## 📬 Contact
 
-👩‍💻 **Developer:** Soham Aswar
-📧 **Email:** [sohamaswar.dev@gmail.com](mailto:sohamaswar.dev@gmail.com)
-🔗 **LinkedIn:** [linkedin.com/in/sohamaswar](https://linkedin.com/in/sohamaswar)
+**👩‍💻 Author:** Soham Aswar
+**📧 Email:** [sohamaswar@gmail.com](mailto:sohamaswar@gmail.com)
+**🔗 LinkedIn:** [linkedin.com/in/sohamaswar](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiu_OOsjcyQAxX0YfUHHVMJO7AQFnoECBsQAQ&url=https%3A%2F%2Fin.linkedin.com%2Fin%2Fsoham-aswar-18376b22a%3Ftrk%3Dpublic_profile_browsemap&usg=AOvVaw0ivsKXXKueS298YG0EHdQv&opi=89978449)
 
----
-
-## 🏁 License
-
-This project is released under the **MIT License** — feel free to use and modify it for learning or personal use.
-
----
 
 ⭐ **If you found this project useful, give it a star on GitHub!**
-
-```
-
----
-
-Would you like me to now create a **matching README.md for your frontend (React Native) Twalky Meet app** in the same style (with setup commands, socket connection details, etc.)?
-```
